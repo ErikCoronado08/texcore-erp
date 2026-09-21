@@ -2,24 +2,28 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Categoria;
+use App\Models\Almacen;
+use App\Models\Producto;
+use App\Models\RolloLote;
+use App\Models\KardexMovimiento;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // 1. Crear catálogos fijos
+        Categoria::factory(5)->create();
+        Almacen::factory(3)->create();
+        
+        // 2. Crear catálogo de telas/productos
+        Producto::factory(20)->create();
+        
+        // 3. Ingresar rollos físicos a los almacenes
+        RolloLote::factory(50)->create();
+        
+        // 4. Generar historial de cortes y mermas en la mesa de producción
+        KardexMovimiento::factory(150)->create();
     }
 }
