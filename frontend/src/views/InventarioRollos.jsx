@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, Filter, Download } from 'lucide-react'
+import { Search, Filter, Download, FileText } from 'lucide-react'
 import api from '../api'
 
 export default function InventarioRollos() {
@@ -32,7 +32,7 @@ export default function InventarioRollos() {
     return coincideTexto && coincideUbicacion
   })
 
-  // Función para exportar los datos filtrados a CSV
+  // Exportar a CSV (Excel)
   const exportarCSV = () => {
     const encabezados = "ID Rollo,Material,SKU,Lote,Ubicacion,Metraje Actual (m)\n"
     const filas = rollosFiltrados.map(r => 
@@ -49,31 +49,59 @@ export default function InventarioRollos() {
     document.body.removeChild(link)
   }
 
+  // Generar Reporte PDF formal corporativo
+  const generarPDF = () => {
+    window.print()
+  }
+
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+      {/* Encabezado visible solo en pantalla */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8 print:hidden">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Inventario de Rollos</h1>
           <p className="text-slate-500 text-sm mt-1">Control físico actual de rollos, metrajes disponibles y ubicaciones en almacén.</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <button 
+            onClick={generarPDF}
+            className="bg-slate-900 hover:bg-slate-800 text-white font-medium px-3.5 py-2 rounded-xl shadow-sm transition-all flex items-center gap-2 text-xs"
+          >
+            <FileText size={15} />
+            Reporte PDF
+          </button>
           <button 
             onClick={exportarCSV}
-            className="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 text-sm"
+            className="bg-slate-900 hover:bg-slate-800 text-white font-medium px-3.5 py-2 rounded-xl shadow-sm transition-all flex items-center gap-2 text-xs"
           >
-            <Download size={16} />
-            Exportar Reporte CSV
+            <Download size={15} />
+            Exportar CSV
           </button>
-          <div className="bg-white px-5 py-2.5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-3">
-            <span className="text-sm text-slate-500 font-medium">Rollos:</span>
-            <span className="text-base font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-100">
+          <div className="bg-white px-3.5 py-2 rounded-xl shadow-sm border border-slate-200 flex items-center gap-2 text-xs">
+            <span className="text-slate-500 font-medium">Rollos:</span>
+            <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100">
               {rollosFiltrados.length} / {rollos.length}
             </span>
           </div>
         </div>
       </div>
 
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
+      {/* Membrete formal exclusivo para el PDF impreso */}
+      <div className="hidden print:block mb-6 border-b pb-4">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">TexCore - ERP Textil</h1>
+            <p className="text-sm text-slate-600">Reporte Oficial de Inventario Físico de Rollos</p>
+          </div>
+          <div className="text-right text-xs text-slate-500">
+            <p>Fecha de emisión: {new Date().toLocaleDateString()}</p>
+            <p>Filtro de ubicación: {ubicacionFiltro.toUpperCase()}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Filtros ocultos al imprimir PDF */}
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center print:hidden">
         <div className="relative w-full md:w-96">
           <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400"><Search size={18} /></span>
           <input 
@@ -101,11 +129,12 @@ export default function InventarioRollos() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-xl shadow-slate-100 border border-slate-200/80 overflow-hidden">
+      {/* Tabla de Inventario */}
+      <div className="bg-white rounded-2xl shadow-xl shadow-slate-100 border border-slate-200/80 overflow-hidden print:shadow-none print:border-none">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <tr className="bg-slate-50/80 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider print:bg-slate-100">
                 <th className="px-6 py-4">ID Rollo</th>
                 <th className="px-6 py-4">Material / Producto</th>
                 <th className="px-6 py-4">Lote (Dye Lot)</th>
@@ -134,6 +163,18 @@ export default function InventarioRollos() {
               )}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Pie de página para firmas en PDF impreso */}
+      <div className="hidden print:flex justify-between mt-16 pt-8 border-t text-xs text-slate-600 text-center">
+        <div>
+          <div className="border-t border-slate-400 w-48 mx-auto mb-1"></div>
+          <p className="font-semibold">Elaborado por (Almacén)</p>
+        </div>
+        <div>
+          <div className="border-t border-slate-400 w-48 mx-auto mb-1"></div>
+          <p className="font-semibold">Autorizado por (Gerencia)</p>
         </div>
       </div>
     </div>

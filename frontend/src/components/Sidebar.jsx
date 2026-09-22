@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Scissors, PackageSearch, Truck, Boxes, PlusSquare } from 'lucide-react'
+import { LayoutDashboard, Scissors, PackageSearch, Truck, Boxes, PlusSquare, Warehouse, Users, UserPlus } from 'lucide-react'
 
 export default function Sidebar() {
   const location = useLocation();
@@ -8,20 +8,24 @@ export default function Sidebar() {
     { path: '/', icon: <LayoutDashboard size={18} />, label: 'Dashboard Kardex' },
     { path: '/inventario', icon: <PackageSearch size={18} />, label: 'Inventario de Rollos' },
     { path: '/productos', icon: <Boxes size={18} />, label: 'Catálogo de Telas' },
+    { path: '/almacenes', icon: <Warehouse size={18} />, label: 'Almacenes y Bodegas' },
+    { path: '/usuarios', icon: <Users size={18} />, label: 'Control de Usuarios' },
   ];
 
   const menuFormularios = [
     { path: '/nuevo-movimiento', icon: <Scissors size={18} />, label: 'Registrar Corte / Merma' },
     { path: '/nueva-compra', icon: <Truck size={18} />, label: 'Recepción de Rollo' },
     { path: '/nuevo-producto', icon: <PlusSquare size={18} />, label: 'Nueva Tela (Catálogo)' },
+    { path: '/nuevo-almacen', icon: <Warehouse size={18} />, label: 'Nueva Bodega' },
+    { path: '/nuevo-usuario', icon: <UserPlus size={18} />, label: 'Nuevo Usuario' },
   ];
 
   return (
-    <aside className="w-64 min-h-screen flex flex-col fixed left-0 top-0 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-r border-slate-800 shadow-2xl z-20">
+    <aside className="w-64 h-screen flex flex-col fixed left-0 top-0 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-r border-slate-800 shadow-2xl z-20 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-700 [&::-webkit-scrollbar-thumb]:rounded-full">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-500/30 to-transparent"></div>
 
-      {/* Logo */}
-      <div className="px-6 py-6 flex justify-center items-center border-b border-slate-800/80 bg-slate-950/50">
+      {/* Logo fijo */}
+      <div className="px-6 py-6 flex justify-center items-center border-b border-slate-800/80 bg-slate-950/50 flex-shrink-0">
         <img 
           src="/logo.png" 
           alt="TexCore Logo" 
@@ -81,7 +85,8 @@ export default function Sidebar() {
         </div>
       </nav>
 
-      <div className="p-4 text-xs text-slate-500 text-center border-t border-slate-800/80 bg-slate-950/60">
+      {/* Footer fijo */}
+      <div className="p-4 text-xs text-slate-500 text-center border-t border-slate-800/80 bg-slate-950/60 flex-shrink-0">
         ERP Maquiladora v1.0<br/>© 2026 TexCore
       </div>
     </aside>
