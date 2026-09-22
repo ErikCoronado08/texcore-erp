@@ -12,9 +12,9 @@ class KardexMovimiento extends Model
     protected $table = 'kardex_movimientos';
     
     protected $fillable = [
-        'rollo_id', 
-        'tipo_movimiento', 
-        'metraje'
+    'rollo_id',
+    'tipo_movimiento',
+    'metraje'
     ];
 
     protected $casts = [
