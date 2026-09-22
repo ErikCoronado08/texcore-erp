@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { TrendingUp, Truck, Scissors, AlertTriangle } from 'lucide-react'
+import { TrendingUp, Truck, Scissors, AlertTriangle, Download, BarChart3 } from 'lucide-react'
 import api from '../api'
 
 export default function DashboardKardex() {
@@ -22,6 +22,11 @@ export default function DashboardKardex() {
   const totalCortes = movimientos.filter(m => m.tipo_movimiento === 'salida_corte').length
   const totalMermas = movimientos.filter(m => m.tipo_movimiento === 'merma').length
 
+  // Cálculo de porcentajes para las barras analíticas
+  const porcEntradas = totalMovimientos > 0 ? ((totalEntradas / totalMovimientos) * 100).toFixed(1) : 0
+  const porcCortes = totalMovimientos > 0 ? ((totalCortes / totalMovimientos) * 100).toFixed(1) : 0
+  const porcMermas = totalMovimientos > 0 ? ((totalMermas / totalMovimientos) * 100).toFixed(1) : 0
+
   const getBadgeStyle = (tipo) => {
     switch (tipo) {
       case 'entrada_compra': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
@@ -31,14 +36,40 @@ export default function DashboardKardex() {
     }
   }
 
+  const exportarKardexCSV = () => {
+    const encabezados = "ID Transaccion,Material,Lote,Tipo Operacion,Metraje (m)\n"
+    const filas = movimientos.map(m => 
+      `"#${String(m.id).padStart(5, '0')}","${m.rollo?.producto?.nombre || ''}","${m.rollo?.codigo_tinte || ''}","${m.tipo_movimiento}","${m.metraje}"`
+    ).join("\n")
+
+    const blob = new Blob([encabezados + filas], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.setAttribute('href', url)
+    link.setAttribute('download', `kardex_auditoria_${new Date().toISOString().slice(0,10)}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard General & Auditoría</h1>
-        <p className="text-slate-500 text-sm mt-1">Resumen ejecutivo del estado de operaciones en piso de producción.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard General & Auditoría</h1>
+          <p className="text-slate-500 text-sm mt-1">Resumen ejecutivo y analítico del estado de operaciones en piso de producción.</p>
+        </div>
+        <button 
+          onClick={exportarKardexCSV}
+          className="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 text-sm self-start sm:self-auto"
+        >
+          <Download size={16} />
+          Exportar Kardex CSV
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {/* Tarjetas de Métricas Ejecutivas (KPIs) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <div className="bg-white p-6 rounded-2xl shadow-xl shadow-slate-100 border border-slate-200/80 flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Transacciones</p>
@@ -72,6 +103,44 @@ export default function DashboardKardex() {
         </div>
       </div>
 
+      {/* Sección Analítica: Gráfica de Proporción de Operaciones */}
+      <div className="bg-white p-6 rounded-2xl shadow-xl shadow-slate-100 border border-slate-200/80 mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          <BarChart3 className="text-slate-600" size={20} />
+          <h2 className="font-bold text-slate-800 text-base">Análisis de Distribución Operativa</h2>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <div className="flex justify-between text-xs font-semibold text-slate-600 mb-1">
+              <span>Entradas por Compra ({porcEntradas}%)</span>
+              <span>{totalEntradas} reg.</span>
+            </div>
+            <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+              <div className="bg-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${porcEntradas}%` }}></div>
+            </div>
+          </div>
+          <div>
+            <div className="flex justify-between text-xs font-semibold text-slate-600 mb-1">
+              <span>Salidas a Corte ({porcCortes}%)</span>
+              <span>{totalCortes} reg.</span>
+            </div>
+            <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+              <div className="bg-sky-500 h-full rounded-full transition-all duration-500" style={{ width: `${porcCortes}%` }}></div>
+            </div>
+          </div>
+          <div>
+            <div className="flex justify-between text-xs font-semibold text-slate-600 mb-1">
+              <span>Mermas / Desperdicio ({porcMermas}%)</span>
+              <span>{totalMermas} reg.</span>
+            </div>
+            <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+              <div className="bg-rose-500 h-full rounded-full transition-all duration-500" style={{ width: `${porcMermas}%` }}></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabla del Kardex */}
       <div className="bg-white rounded-2xl shadow-xl shadow-slate-100 border border-slate-200/80 overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
           <h2 className="font-bold text-slate-800 text-base">Historial de Movimientos</h2>

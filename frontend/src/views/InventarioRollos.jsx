@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, Filter } from 'lucide-react'
+import { Search, Filter, Download } from 'lucide-react'
 import api from '../api'
 
 export default function InventarioRollos() {
@@ -32,6 +32,23 @@ export default function InventarioRollos() {
     return coincideTexto && coincideUbicacion
   })
 
+  // Función para exportar los datos filtrados a CSV
+  const exportarCSV = () => {
+    const encabezados = "ID Rollo,Material,SKU,Lote,Ubicacion,Metraje Actual (m)\n"
+    const filas = rollosFiltrados.map(r => 
+      `"#${String(r.id).padStart(5, '0')}","${r.producto?.nombre || ''}","${r.producto?.sku || ''}","${r.codigo_tinte}","${r.almacen?.nombre || 'Bodega Principal'}","${r.metraje_actual}"`
+    ).join("\n")
+
+    const blob = new Blob([encabezados + filas], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.setAttribute('href', url)
+    link.setAttribute('download', `inventario_rollos_${new Date().toISOString().slice(0,10)}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   return (
     <div className="max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
@@ -39,11 +56,20 @@ export default function InventarioRollos() {
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Inventario de Rollos</h1>
           <p className="text-slate-500 text-sm mt-1">Control físico actual de rollos, metrajes disponibles y ubicaciones en almacén.</p>
         </div>
-        <div className="bg-white px-5 py-2.5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-3 self-start sm:self-auto">
-          <span className="text-sm text-slate-500 font-medium">Rollos mostrados:</span>
-          <span className="text-base font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-100">
-            {rollosFiltrados.length} <span className="text-xs text-slate-400 font-normal">/ {rollos.length}</span>
-          </span>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={exportarCSV}
+            className="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 text-sm"
+          >
+            <Download size={16} />
+            Exportar Reporte CSV
+          </button>
+          <div className="bg-white px-5 py-2.5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-3">
+            <span className="text-sm text-slate-500 font-medium">Rollos:</span>
+            <span className="text-base font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-100">
+              {rollosFiltrados.length} / {rollos.length}
+            </span>
+          </div>
         </div>
       </div>
 
